@@ -1,0 +1,112 @@
+Voici une procédure détaillée pour déployer un site web sur une instance EC2 et créer un script pour compter le nombre de visiteurs.
+
+### Étape 1 : Créer une instance EC2
+
+1. **Connectez-vous à la console AWS**.
+2. **Accédez à EC2** et cliquez sur "Lancer des instances".
+3. **Choisissez une AMI** (ex. : Amazon Linux 2 ou Ubuntu).
+4. **Sélectionnez un type d'instance** (ex. : t2.micro pour un usage léger).
+5. **Configurer les détails de l'instance** :
+   - Assurez-vous de configurer le groupe de sécurité pour autoriser le trafic HTTP (port 80).
+6. **Ajouter un stockage** (la taille par défaut est généralement suffisante).
+7. **Configurer un groupe de sécurité** :
+   - Autorisez le trafic entrant sur le port 80 (HTTP).
+   - Autorisez le trafic SSH (port 22) pour accéder à l'instance.
+8. **Lancez l'instance** et téléchargez la clé SSH pour vous connecter.
+
+### Étape 2 : Se connecter à l'instance EC2
+
+Utilisez SSH pour vous connecter à votre instance EC2.
+
+```bash
+ssh -i "your-key.pem" ec2-user@your-instance-public-ip
+```
+
+### Étape 3 : Installer un serveur web
+
+1. **Mettez à jour vos paquets** :
+
+   ```bash
+   sudo yum update -y  # Pour Amazon Linux
+   # ou
+   sudo apt update && sudo apt upgrade -y  # Pour Ubuntu
+   ```
+
+2. **Installer un serveur web** (ex. : Apache ou Nginx) :
+
+   Pour Apache :
+
+   ```bash
+   sudo yum install httpd -y  # Pour Amazon Linux
+   # ou
+   sudo apt install apache2 -y  # Pour Ubuntu
+   ```
+
+3. **Démarrer le serveur web** :
+
+   Pour Apache :
+
+   ```bash
+   sudo systemctl start httpd
+   sudo systemctl enable httpd
+   ```
+
+### Étape 4 : Déployer votre site web
+
+1. **Téléchargez ou copiez vos fichiers de site web dans le répertoire d'Apache** :
+
+   ```bash
+   sudo cp -r /path/to/your/site/* /var/www/html/
+   ```
+
+2. **Vérifiez que votre site est accessible** en ouvrant votre navigateur et en accédant à `http://your-instance-public-ip`.
+
+### Étape 5 : Écrire un script pour compter le nombre de visiteurs
+
+1. **Créer un fichier de script PHP** (si vous utilisez PHP) :
+
+   ```bash
+   sudo nano /var/www/html/index.php
+   ```
+
+2. **Ajouter le code suivant** pour compter les visiteurs :
+
+   ```php
+   <?php
+   // Fichier de comptage des visiteurs
+   $file = 'counter.txt';
+
+   // Vérifiez si le fichier existe, sinon créez-le
+   if (!file_exists($file)) {
+       file_put_contents($file, 0);
+   }
+
+   // Lire le nombre actuel de visiteurs
+   $count = file_get_contents($file);
+
+   // Incrémentez le compteur
+   $count++;
+
+   // Écrire le nouveau nombre dans le fichier
+   file_put_contents($file, $count);
+
+   // Afficher le nombre de visiteurs
+   echo "Nombre de visiteurs : " . $count;
+   ?>
+   ```
+
+3. **Créer le fichier `counter.txt`** pour stocker le nombre de visiteurs :
+
+   ```bash
+   sudo touch /var/www/html/counter.txt
+   sudo chmod 666 /var/www/html/counter.txt  # Autoriser l'écriture
+   ```
+
+### Étape 6 : Tester le compteur de visiteurs
+
+1. **Accédez à votre site web** en utilisant l'IP publique de votre instance.
+2. **Rafraîchissez la page** pour vérifier que le compteur augmente.
+
+### Conclusion
+
+Vous avez maintenant déployé un site web sur une instance EC2 et créé un script pour compter le nombre de visiteurs. Assurez-vous de sécuriser votre instance et d'effectuer des sauvegardes régulières de vos données.
